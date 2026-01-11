@@ -1,0 +1,19 @@
+{
+    "name": "prophet-contracts",
+    "version": "1.0.0",
+    "description": "Smart contracts for Prophet.AI",
+    "main": "index.js",
+    "scripts": {
+        "test": "hardhat test",
+        "compile": "hardhat compile",
+        "deploy": "hardhat run scripts/deploy.cjs"
+    },
+    "keywords": [],
+    "author": "",
+    "license": "ISC",
+    "devDependencies": {
+        "@nomicfoundation/hardhat-toolbox": "^5.0.0",
+        "hardhat": "^2.22.3",
+        "dotenv": "^16.4.5"
+    }
+}
