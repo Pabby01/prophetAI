@@ -8,18 +8,39 @@ import { motion, AnimatePresence } from 'framer-motion'
 
 const CONTRACT_ADDRESS = process.env.NEXT_PUBLIC_PROPHET_MARKET_ADDRESS || "0x0000000000000000000000000000000000000000"
 
-export function ChatInterface() {
-    const { messages, input, handleInputChange, handleSubmit, isLoading } = useChat({
+export function ChatInterface({ initialPrompt }: { initialPrompt?: string }) {
+    const { messages, input, setInput, handleInputChange, handleSubmit, isLoading, append } = useChat({
         api: '/api/chat',
     })
-    const messagesEndRef = useRef<HTMLDivElement>(null)
-
-    const scrollToBottom = () => {
-        messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
-    }
 
     useEffect(() => {
-        scrollToBottom()
+        if (initialPrompt && messages.length === 0) {
+            append({
+                role: 'user',
+                content: initialPrompt
+            })
+        }
+    }, [initialPrompt])
+
+    const messagesEndRef = useRef<HTMLDivElement>(null)
+
+    useEffect(() => {
+        // Always scroll to bottom on new messages
+        messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
+
+        // Save history if it's a new user conversation
+        if (messages.length > 0 && messages[0].role === 'user') {
+            const history = JSON.parse(localStorage.getItem('prophet_history') || '[]')
+            const title = messages[0].content.slice(0, 30) + (messages[0].content.length > 30 ? '...' : '')
+
+            // Avoid duplicates at top
+            if (history[0] !== title) {
+                const newHistory = [title, ...history].slice(0, 10)
+                localStorage.setItem('prophet_history', JSON.stringify(newHistory))
+                // Dispatch event for sidebar to update
+                window.dispatchEvent(new Event('storage'))
+            }
+        }
     }, [messages])
 
     return (
@@ -88,8 +109,8 @@ export function ChatInterface() {
                             className={`flex ${m.role === 'user' ? 'justify-end' : 'justify-start'}`}
                         >
                             <div className={`max-w-[85%] rounded-2xl px-5 py-4 shadow-lg ${m.role === 'user'
-                                    ? 'bg-blue-600 text-white rounded-br-none shadow-blue-900/20'
-                                    : 'bg-zinc-900 text-zinc-200 border border-zinc-800 rounded-bl-none shadow-zinc-900/50'
+                                ? 'bg-blue-600 text-white rounded-br-none shadow-blue-900/20'
+                                : 'bg-zinc-900 text-zinc-200 border border-zinc-800 rounded-bl-none shadow-zinc-900/50'
                                 }`}>
                                 {m.content && <div className="whitespace-pre-wrap text-sm leading-relaxed">{m.content}</div>}
 

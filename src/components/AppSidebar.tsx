@@ -1,28 +1,47 @@
 'use client'
 
-import { usePathname } from 'next/navigation'
+import { usePathname, useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { motion } from 'framer-motion'
-import { Home, LineChart, Settings, User, PlusCircle, MessageSquare, LogOut, ChevronRight } from 'lucide-react'
-import { useState } from 'react'
+import { Home, LineChart, Settings, User, PlusCircle, MessageSquare, LogOut, ChevronRight, Trash2 } from 'lucide-react'
+import { useState, useEffect } from 'react'
 
 const MENU_ITEMS = [
     { icon: Home, label: 'Oracle Chat', href: '/' },
     { icon: LineChart, label: 'Markets', href: '/markets' },
-    //   { icon: User, label: 'Profile', href: '/profile' }, // Future
-    //   { icon: Settings, label: 'Settings', href: '/settings' }, // Future
-]
-
-const RECENT_CHATS = [
-    "Bitcoin Prediction May 2025",
-    "US Election Odds",
-    "Mantle Ecosystem Growth",
-    "Ethereum ETF Approval",
 ]
 
 export function AppSidebar() {
     const pathname = usePathname()
-    const [activeChat, setActiveChat] = useState(0)
+    const router = useRouter()
+    const [history, setHistory] = useState<string[]>([])
+
+    useEffect(() => {
+        // Load initial
+        const loadHistory = () => {
+            const stored = localStorage.getItem('prophet_history')
+            if (stored) setHistory(JSON.parse(stored))
+        }
+        loadHistory()
+
+        // Listen for updates
+        window.addEventListener('storage', loadHistory)
+        return () => window.removeEventListener('storage', loadHistory)
+    }, [])
+
+    const handleClear = () => {
+        localStorage.removeItem('prophet_history')
+        setHistory([])
+    }
+
+    const handleHistoryClick = (item: string) => {
+        router.push(`/?q=${encodeURIComponent(item)}`)
+    }
+
+    const handleNewChat = () => {
+        // Force hard refresh to clear chat state effectively or just push to /
+        window.location.href = "/"
+    }
 
     return (
         <div className="flex flex-col h-full bg-black border-r border-zinc-900 w-64 shrink-0 transition-all duration-300">
@@ -38,7 +57,10 @@ export function AppSidebar() {
 
             {/* New Chat Button */}
             <div className="px-4 mb-6">
-                <button className="w-full flex items-center gap-2 bg-zinc-100 hover:bg-white text-zinc-900 px-4 py-3 rounded-xl font-medium transition-colors shadow-lg shadow-zinc-900/20 active:scale-95 duration-200">
+                <button
+                    onClick={handleNewChat}
+                    className="w-full flex items-center gap-2 bg-zinc-100 hover:bg-white text-zinc-900 px-4 py-3 rounded-xl font-medium transition-colors shadow-lg shadow-zinc-900/20 active:scale-95 duration-200"
+                >
                     <PlusCircle size={20} />
                     <span>New Prediction</span>
                 </button>
@@ -65,19 +87,31 @@ export function AppSidebar() {
             </nav>
 
             {/* Recent Chats Section */}
-            <div className="mt-8 px-6">
-                <h3 className="text-xs font-bold text-zinc-600 uppercase tracking-wider mb-4">Recent Visions</h3>
-                <div className="space-y-1">
-                    {RECENT_CHATS.map((chat, i) => (
-                        <button
-                            key={i}
-                            onClick={() => setActiveChat(i)}
-                            className={`nav-item w-full text-left truncate text-sm px-2 py-2 rounded-lg transition-colors flex items-center gap-2 ${activeChat === i ? 'bg-blue-500/10 text-blue-400' : 'text-zinc-500 hover:bg-zinc-900/50 hover:text-zinc-300'}`}
-                        >
-                            <MessageSquare size={14} className="shrink-0 opacity-50" />
-                            <span className="truncate">{chat}</span>
+            <div className="mt-8 px-6 flex-1 overflow-y-auto scrollbar-none">
+                <div className="flex items-center justify-between mb-4">
+                    <h3 className="text-xs font-bold text-zinc-600 uppercase tracking-wider">Recent Visions</h3>
+                    {history.length > 0 && (
+                        <button onClick={handleClear} className="text-zinc-700 hover:text-red-500 transition-colors">
+                            <Trash2 size={12} />
                         </button>
-                    ))}
+                    )}
+                </div>
+
+                <div className="space-y-1">
+                    {history.length === 0 ? (
+                        <div className="text-xs text-zinc-700 italic">No visions yet...</div>
+                    ) : (
+                        history.map((chat, i) => (
+                            <button
+                                key={i}
+                                onClick={() => handleHistoryClick(chat)}
+                                className="nav-item w-full text-left truncate text-sm px-2 py-2 rounded-lg transition-colors flex items-center gap-2 text-zinc-500 hover:bg-zinc-900/50 hover:text-zinc-300"
+                            >
+                                <MessageSquare size={14} className="shrink-0 opacity-50" />
+                                <span className="truncate">{chat}</span>
+                            </button>
+                        ))
+                    )}
                 </div>
             </div>
 

@@ -1,12 +1,8 @@
-'use client'
-
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
-import { WagmiProvider } from 'wagmi'
-import { config } from '@/config/wagmi'
-import { ChatInterface } from '@/components/ChatInterface'
-import { useState } from 'react'
+import { useSearchParams } from 'next/navigation'
 
 export default function Home() {
+  const searchParams = useSearchParams()
+  const q = searchParams.get('q')
   const [queryClient] = useState(() => new QueryClient())
 
   return (
@@ -23,7 +19,7 @@ export default function Home() {
             </div>
           </div>
 
-          <ChatInterface />
+          <ChatInterface initialPrompt={searchParams?.q} />
         </div>
       </QueryClientProvider>
     </WagmiProvider>
