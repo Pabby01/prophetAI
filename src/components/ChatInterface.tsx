@@ -1,7 +1,7 @@
 'use client'
 
 import { useChat } from 'ai/react'
-import { useRef, useEffect } from 'react'
+import { useRef, useEffect, useState } from 'react'
 import { BettingCard } from './BettingCard'
 import { Loader2, Send, Cpu, Sparkles } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
@@ -9,39 +9,89 @@ import { motion, AnimatePresence } from 'framer-motion'
 const CONTRACT_ADDRESS = process.env.NEXT_PUBLIC_PROPHET_MARKET_ADDRESS || "0x0000000000000000000000000000000000000000"
 
 export function ChatInterface({ initialPrompt }: { initialPrompt?: string }) {
-    const { messages, input, setInput, handleInputChange, handleSubmit, isLoading, append } = useChat({
-        api: '/api/chat',
+    // Generate or retrieve Chat ID from URL (or create new)
+    const [chatId, setChatId] = useState<string>(() => {
+        if (typeof window !== 'undefined') {
+            const params = new URLSearchParams(window.location.search)
+            return params.get('c') || crypto.randomUUID()
+        }
+        return ''
     })
 
+    // Load persisted state on mount
+    const [initialMessages, setInitialMessages] = useState<any[]>([])
+
     useEffect(() => {
-        if (initialPrompt && messages.length === 0) {
-            append({
-                role: 'user',
-                content: initialPrompt
-            })
+        if (!chatId) return
+        const saved = localStorage.getItem(`prophet_messages_${chatId}`)
+        if (saved) {
+            try {
+                setInitialMessages(JSON.parse(saved))
+            } catch (e) { console.error("Failed to load chat", e) }
         }
-    }, [initialPrompt])
+    }, [chatId])
+
+    const { messages, input, setInput, handleInputChange, handleSubmit, isLoading, append } = useChat({
+        api: '/api/chat',
+        initialMessages,
+        onFinish: (message) => {
+            saveChat(message) // Save assistant message
+        }
+    })
+
+    // Save on user updates
+    useEffect(() => {
+        if (messages.length > 0) {
+            saveChat()
+        }
+    }, [messages])
+
+    const saveChat = (newMsg?: any) => {
+        if (!chatId) return
+
+        // 1. Save Content
+        const currentMsgs = newMsg ? [...messages, newMsg] : messages
+        localStorage.setItem(`prophet_messages_${chatId}`, JSON.stringify(currentMsgs))
+
+        // 2. Update Index (Title)
+        const history = JSON.parse(localStorage.getItem('prophet_chats') || '[]')
+        const existingIndex = history.findIndex((h: any) => h.id === chatId)
+
+        // Only title update if it's the first user message
+        const firstUserMsg = currentMsgs.find((m: any) => m.role === 'user')
+        if (firstUserMsg) {
+            const title = firstUserMsg.content.slice(0, 30) + (firstUserMsg.content.length > 30 ? '...' : '')
+
+            const meta = {
+                id: chatId,
+                title: title || 'New Vision',
+                timestamp: Date.now()
+            }
+
+            if (existingIndex >= 0) {
+                // Update timestamp/existing
+                history[existingIndex] = meta
+            } else {
+                // New chat
+                history.unshift(meta)
+            }
+            localStorage.setItem('prophet_chats', JSON.stringify(history))
+            window.dispatchEvent(new Event('storage'))
+        }
+    }
+
 
     const messagesEndRef = useRef<HTMLDivElement>(null)
 
     useEffect(() => {
-        // Always scroll to bottom on new messages
         messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
-
-        // Save history if it's a new user conversation
-        if (messages.length > 0 && messages[0].role === 'user') {
-            const history = JSON.parse(localStorage.getItem('prophet_history') || '[]')
-            const title = messages[0].content.slice(0, 30) + (messages[0].content.length > 30 ? '...' : '')
-
-            // Avoid duplicates at top
-            if (history[0] !== title) {
-                const newHistory = [title, ...history].slice(0, 10)
-                localStorage.setItem('prophet_history', JSON.stringify(newHistory))
-                // Dispatch event for sidebar to update
-                window.dispatchEvent(new Event('storage'))
-            }
-        }
     }, [messages])
+
+    useEffect(() => {
+        if (initialPrompt && messages.length === 0) {
+            append({ role: 'user', content: initialPrompt })
+        }
+    }, [initialPrompt])
 
     return (
         <div className="flex flex-col h-[700px] w-full max-w-3xl mx-auto bg-zinc-950 border border-zinc-800 rounded-2xl overflow-hidden shadow-2xl relative">

@@ -7,6 +7,8 @@ import { useSearchParams } from 'next/navigation'
 function ChatWrapper() {
   const searchParams = useSearchParams()
   const q = searchParams.get('q')
+  // Pass chat ID logic if needed, but current ChatInterface handles ?c= internally via window/search params
+  // To stay clean we can just render the component.
   return <ChatInterface initialPrompt={q || undefined} />
 }
 

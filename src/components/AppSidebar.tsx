@@ -15,32 +15,32 @@ const MENU_ITEMS = [
 export function AppSidebar() {
     const pathname = usePathname()
     const router = useRouter()
-    const [history, setHistory] = useState<string[]>([])
+
+    // History is now an object array { id, title, timestamp }
+    const [history, setHistory] = useState<any[]>([])
 
     useEffect(() => {
-        // Load initial
         const loadHistory = () => {
-            const stored = localStorage.getItem('prophet_history')
-            if (stored) setHistory(JSON.parse(stored))
+            const stored = localStorage.getItem('prophet_chats')
+            if (stored) {
+                setHistory(JSON.parse(stored))
+            }
         }
         loadHistory()
-
-        // Listen for updates
         window.addEventListener('storage', loadHistory)
         return () => window.removeEventListener('storage', loadHistory)
     }, [])
 
     const handleClear = () => {
-        localStorage.removeItem('prophet_history')
+        localStorage.removeItem('prophet_chats')
         setHistory([])
     }
 
-    const handleHistoryClick = (item: string) => {
-        router.push(`/?q=${encodeURIComponent(item)}`)
+    const handleHistoryClick = (chatId: string) => {
+        window.location.href = `/?c=${chatId}`
     }
 
     const handleNewChat = () => {
-        // Force hard refresh to clear chat state effectively or just push to /
         window.location.href = "/"
     }
 
@@ -105,11 +105,11 @@ export function AppSidebar() {
                         history.map((chat, i) => (
                             <button
                                 key={i}
-                                onClick={() => handleHistoryClick(chat)}
+                                onClick={() => handleHistoryClick(chat.id)}
                                 className="nav-item w-full text-left truncate text-sm px-2 py-2 rounded-lg transition-colors flex items-center gap-2 text-zinc-500 hover:bg-zinc-900/50 hover:text-zinc-300"
                             >
                                 <MessageSquare size={14} className="shrink-0 opacity-50" />
-                                <span className="truncate">{chat}</span>
+                                <span className="truncate">{chat.title}</span>
                             </button>
                         ))
                     )}
