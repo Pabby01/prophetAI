@@ -4,6 +4,7 @@ import './globals.css'
 import { AppSidebar } from '@/components/AppSidebar'
 import { MarketTicker } from '@/components/MarketTicker'
 import { MobileHeader } from '@/components/MobileNav'
+import { Providers } from '@/components/Providers'
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -20,19 +21,21 @@ export default function RootLayout({
   return (
     <html lang="en" className="dark">
       <body className={`${inter.className} bg-black text-zinc-100 flex h-screen overflow-hidden selection:bg-blue-500/30`}>
-        {/* Desktop Sidebar */}
-        <div className="hidden md:flex h-full">
-          <AppSidebar />
-        </div>
+        <Providers>
+          {/* Desktop Sidebar */}
+          <div className="hidden md:flex h-full">
+            <AppSidebar />
+          </div>
 
-        {/* Main Content Area */}
-        <div className="flex-1 flex flex-col h-full relative overflow-hidden bg-black">
-          <MobileHeader />
-          <MarketTicker />
-          <main className="flex-1 overflow-y-auto w-full relative">
-            {children}
-          </main>
-        </div>
+          {/* Main Content Area */}
+          <div className="flex-1 flex flex-col h-full relative overflow-hidden bg-black">
+            <MobileHeader />
+            <MarketTicker />
+            <main className="flex-1 overflow-y-auto w-full relative">
+              {children}
+            </main>
+          </div>
+        </Providers>
       </body>
     </html>
   )

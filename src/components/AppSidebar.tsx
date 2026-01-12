@@ -5,6 +5,7 @@ import Link from 'next/link'
 import { motion } from 'framer-motion'
 import { Home, LineChart, Settings, User, PlusCircle, MessageSquare, LogOut, ChevronRight, Trash2 } from 'lucide-react'
 import { useState, useEffect } from 'react'
+import { ConnectWallet } from './ConnectWallet'
 
 const MENU_ITEMS = [
     { icon: Home, label: 'Oracle Chat', href: '/' },
@@ -117,14 +118,7 @@ export function AppSidebar() {
 
             {/* Footer User Profile */}
             <div className="mt-auto p-4 border-t border-zinc-900">
-                <div className="flex items-center gap-3 p-2 rounded-xl hover:bg-zinc-900/50 cursor-pointer transition-colors group">
-                    <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-purple-500 to-blue-500" />
-                    <div className="flex-1 min-w-0">
-                        <p className="text-sm font-medium text-zinc-200 truncate">Hacker User</p>
-                        <p className="text-xs text-zinc-500 truncate">Pro Plan</p>
-                    </div>
-                    <Settings size={16} className="text-zinc-600 group-hover:text-zinc-400 transition-colors" />
-                </div>
+                <ConnectWallet />
             </div>
         </div>
     )
