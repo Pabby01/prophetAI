@@ -1,54 +1,100 @@
 # Prophet.AI 🔮
-**The Autonomous AI Prediction Market Oracle on Mantle Network**
+### The All-Seeing Oracle on Mantle Network
 
-![Prophet AI Banner](https://i.imgur.com/your-banner-here.png)
+**Prophet.AI** is a next-generation **AI Prediction Market Interface** that combines the reasoning power of LLMs with the liquidity of decentralized prediction markets (Polymarket) and the speed of **Mantle Network**.
 
-## 🏆 Hackathon Tracks
--   **AI & Oracles**: Fully autonomous Node.js agent that resolves markets using Polymarket API data.
--   **GameFi & Social**: "God Mode" UI with gamified betting experience and live market tickers.
+![Prophet Dashboard](https://i.imgur.com/example-dashboard.png)
 
-## 🚀 Overview
-Prophet.AI is a next-generation prediction market interface where users don't just click buttons—they **converse with an Oracle**. 
+---
 
-Powered by **OpenAI (GPT-4o)** and **Mantle Sepolia**, Prophet.AI allows users to:
-1.  **Ask** natural language questions ("Will Bitcoin hit $100k?").
-2.  **Analyze** real-world odds fetched live from Polymarket.
-3.  **Bet** MNT tokens instantly via our custom Betting Card UI.
-4.  **Win** automatically when our AI Oracle resolves the market.
+## 🏆 Hackathon Tracks & Deliverables
+This project is submitted for the **Mantle Global Hackathon**, targeting:
+-   **DeFi / Prediction Markets**: Bridging Web2 AI UX with Web3 liquidity.
+-   **UX/UI Excellence**: A seamless, "Real AI" interface that feels like ChatGPT but acts like a dApp.
+
+---
+
+## 🚀 The Vision
+Prediction markets are the source of truth, but they are hard to navigate. Users have to browse hundreds of markets to find alpha.
+**Prophet.AI changes this.**
+Instead of searching, you **ask**.
+-   *"Will Bitcoin hit $100k?"*
+-   *"Is the Mantle Airdrop confirmed?"*
+
+The AI Oracle:
+1.  **Understand** your intent.
+2.  **Scans** live Polymarket data for the exact event.
+3.  **Analyzes** the odds and news.
+4.  **Challenges** you to place a bet on-chain if you disagree with the market.
+
+---
 
 ## ✨ Key Features
--   **🗣️ Natural Language Betting**: No complex dashboards. Just chat.
--   **🤖 Autonomous Oracle**: A background bot watches real-world events and resolves on-chain markets 24/7.
--   **⚡ Mantle Speed**: Sub-second transactions and negligible gas fees.
--   **🎨 God Mode UX**: Premium dark-mode interface, Framer Motion animations, and a Live Market Ticker.
 
-## 🛠️ Tech Stack
--   **Frontend**: Next.js 14, Tailwind CSS, Framer Motion
--   **Web3**: Wagmi, Viem, Tanstack Query
--   **AI**: Vercel AI SDK, OpenAI GPT-4o
--   **Smart Contract**: Solidity 0.8.20 (Hardhat)
--   **Network**: Mantle Sepolia Testnet
+### 1. 🧠 AI Oracle Chat
+A full-screen, immersive chat interface powered by **GPT-4o**.
+-   **Natural Language Betting**: Just talk to it. "Bet $50 on Yes".
+-   **Deep Context**: It knows the live odds, volume, and market close dates.
+-   **Persona**: A mystical, confident Oracle that keeps users engaged.
 
-## 📦 Installation
+### 2. 📊 Markets Explorer
+A real-time dashboard of trending global events.
+-   **Live Data**: Fetches "Trending" and "High Volume" markets via Polymarket API.
+-   **Click-to-Predict**: See a market you like? Click it to instantly open a debate with the Oracle.
+
+### 3. ⚡ Seamless On-Chain Actions
+-   **Mantle Sepolia Integration**: Deployed smart contracts for betting logic.
+-   **MetaMask / Wallet Connect**: Frictionless wallet connection.
+-   **Non-Custodial**: Users retain full control of their funds.
+
+---
+
+## 🛠 Technical Architecture
+
+### Frontend
+-   **Framework**: Next.js 14 (App Router)
+-   **Styling**: Tailwind CSS + Framer Motion (Glassmorphism & Micro-interactions)
+-   **State**: TanStack Query + Wagmi
+-   **AI**: Vercel AI SDK (Streaming responses)
+
+### Backend / AI Engine
+-   **Model**: OpenAI GPT-4o (via Vercel AI SDK)
+-   **Tools**: Custom Function Calling (`get_odds`, `prepare_bet_transaction`)
+-   **Data**: Polymarket Gamma API (Proxy buffered)
+
+### Smart Contracts (Mantle Sepolia)
+-   **Contract**: `ProphetMarket.sol`
+-   **Address**: `0x...` (See `.env`)
+-   **Functions**: `createMarket`, `placeBet`, `resolveMarket`
+
+---
+
+## 🏁 Getting Started
+
+### Prerequisites
+-   Node.js 18+
+-   Mantle Sepolia funded wallet
+-   OpenAI API Key
+
+### Installation
 
 1.  **Clone the repo**
     ```bash
-    git clone https://github.com/yourusername/prophet-ai.git
+    git clone https://github.com/your-username/prophet-ai.git
     cd prophet-ai
     ```
 
 2.  **Install Dependencies**
     ```bash
     npm install
-    cd smart_contracts && npm install && cd ..
     ```
 
 3.  **Environment Setup**
-    Create `.env.local`:
+    Create a `.env` file:
     ```env
     OPENAI_API_KEY=sk-...
-    NEXT_PUBLIC_PROPHET_MARKET_ADDRESS=0x... (Deployed Address)
-    PRIVATE_KEY=0x... (For Deployment/Oracle)
+    NEXT_PUBLIC_WALLET_CONNECT_PROJECT_ID=...
+    NEXT_PUBLIC_PROPHET_MARKET_ADDRESS=...
     ```
 
 4.  **Run Development Server**
@@ -56,26 +102,28 @@ Powered by **OpenAI (GPT-4o)** and **Mantle Sepolia**, Prophet.AI allows users t
     npm run dev
     ```
 
-## ⛓️ Smart Contracts
-
-**Deployment**
-```bash
-cd smart_contracts
-npx hardhat run scripts/deploy.cjs --network mantleSepolia
-```
-
-**Run the Oracle**
-The Oracle script listens for `MarketCreated` events and checks Polymarket for resolutions.
-```bash
-node smart_contracts/scripts/oracle.js
-```
-
-## 📜 Contract Details
--   **Network**: Mantle Sepolia (Chain ID: 5003)
--   **Address**: `[INSERT YOUR DEPLOYED ADDRESS HERE]`
-
-## 👥 Team
--   **[Your Name/Team Name]**: Full Stack Developer & AI Engineer
+5.  **Open Prophet.AI**
+    Navigate to `http://localhost:3000`.
 
 ---
-*Built with ❤️ for the Mantle Global Hackathon 2025.*
+
+## 🧪 How to Verify (Judges)
+
+1.  **Connect Wallet**: Use the sidebar button to connect to Mantle Sepolia.
+2.  **Ask the Oracle**: Type *"Who wins the US Election?"* or *"Mantle Price"*.
+    -   *Observe*: The AI calls the `get_odds` tool and renders a "Vision Detected" card.
+3.  **Explore Markets**: Go to the **Markets** tab.
+    -   *Observe*: Real-time trending events.
+4.  **Deep Link**: Click a market card.
+    -   *Observe*: It redirects to chat and auto-starts the prediction flow.
+
+---
+
+## 🔮 Future Roadmap
+-   **Automated Resolution**: Chainlink Oracle integration for decentralized settling.
+-   **Social Betting**: "Challenge a Friend" links.
+-   **Token Integration**: $PROPHET token for governance and fee rebates.
+
+---
+
+*Built with ❤️ for the Mantle Hackathon 2025.*

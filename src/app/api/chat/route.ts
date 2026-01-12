@@ -8,8 +8,15 @@ export const maxDuration = 30;
 
 export async function POST(req: Request) {
     try {
+        if (!process.env.OPENAI_API_KEY) {
+            console.error("❌ OPENAI_API_KEY is missing from environment variables.");
+            return new Response("Missing API Key", { status: 401 });
+        }
+
         const { messages }: { messages: CoreMessage[] } = await req.json();
         console.log("Processing chat request with messages:", messages.length);
+        // ... rest of the streamText logic ...
+
 
         const result = streamText({
             model: openai('gpt-4o'),
