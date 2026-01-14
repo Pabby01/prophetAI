@@ -1,25 +1,36 @@
 import { NextResponse } from 'next/server';
+import { MOCK_MARKETS } from '@/lib/polymarket';
 
 export async function GET(request: Request) {
     const { searchParams } = new URL(request.url);
     const q = searchParams.get('q') || 'crypto';
 
     try {
-        const response = await fetch(`https://gamma-api.polymarket.com/events?limit=20&sort=volume&order=desc&q=${q}`, {
-            headers: {
-                'Accept': 'application/json',
-                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
-            }
-        });
+        const baseUrl = `https://gamma-api.polymarket.com/events`;
+        const headers = {
+            'Accept': 'application/json',
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
+        };
+
+        const params = `limit=20&active=true&closed=false&sort=volume&order=desc&q=${q}`;
+        let response = await fetch(`${baseUrl}?${params}`, { headers });
+
+        // Retry logic for 422
+        if (response.status === 422) {
+            console.warn("Proxy: 422 Error. Retrying simple query...");
+            const simpleParams = `limit=10&active=true&closed=false&q=${q}`;
+            response = await fetch(`${baseUrl}?${simpleParams}`, { headers });
+        }
 
         if (!response.ok) {
-            throw new Error(`Polymarket API responded with ${response.status}`);
+            console.warn(`Polymarket API responded with ${response.status}, serving mock data.`);
+            return NextResponse.json(MOCK_MARKETS);
         }
 
         const data = await response.json();
         return NextResponse.json(data);
     } catch (error) {
-        console.error('Polymarket Proxy Error:', error);
-        return NextResponse.json([], { status: 500 });
+        console.error('Polymarket Proxy Error, serving mock data:', error);
+        return NextResponse.json(MOCK_MARKETS);
     }
 }

@@ -11,7 +11,7 @@ export interface Market {
 }
 
 // Fallback data in case API fails (Critical for Demo stability)
-const MOCK_MARKETS: Market[] = [
+export const MOCK_MARKETS: Market[] = [
     {
         id: "mock-1",
         question: "Will Bitcoin hit $100k in 2025?",
@@ -82,18 +82,40 @@ const MOCK_MARKETS: Market[] = [
 
 export async function searchMarkets(query: string): Promise<Market[]> {
     try {
-        // Use our internal proxy to avoid CORS
-        const response = await fetch(`/api/markets?q=${encodeURIComponent(query)}`);
+        let data;
 
-        if (!response.ok) {
-            console.warn("API Error, utilizing fallback data");
-            return MOCK_MARKETS;
+        // SERVER-SIDE CHECK (Node Environment)
+        if (typeof window === 'undefined') {
+            const baseUrl = `https://gamma-api.polymarket.com/events`;
+            const params = `limit=20&active=true&closed=false&sort=volume&order=desc&q=${encodeURIComponent(query)}`;
+
+            console.log(`Fetching: ${baseUrl}?${params}`);
+
+            let response = await fetch(`${baseUrl}?${params}`, {
+                headers: { 'User-Agent': 'Mozilla/5.0 (compatible; ProphetAI/1.0)' }
+            });
+
+            // Retry with simple query if 422 (often caused by sorting issues on low data)
+            if (response.status === 422) {
+                console.warn("422 Error with Sort. Retrying simple query...");
+                const simpleParams = `limit=10&active=true&closed=false&q=${encodeURIComponent(query)}`;
+                response = await fetch(`${baseUrl}?${simpleParams}`, {
+                    headers: { 'User-Agent': 'Mozilla/5.0 (compatible; ProphetAI/1.0)' }
+                });
+            }
+
+            if (!response.ok) throw new Error(`Polymarket API Error: ${response.status}`);
+            data = await response.json();
+        }
+        // CLIENT-SIDE: Use Proxy
+        else {
+            const response = await fetch(`/api/markets?q=${encodeURIComponent(query)}`);
+            if (!response.ok) throw new Error("Proxy API Error");
+            data = await response.json();
         }
 
-        const data = await response.json();
-
-        if (!Array.isArray(data) || data.length === 0) {
-            console.warn("Empty Data, utilizing fallback data");
+        if (!Array.isArray(data)) {
+            console.warn("Invalid API Data Format");
             return MOCK_MARKETS;
         }
 
