@@ -136,45 +136,6 @@ export async function searchMarkets(query: string): Promise<Market[]> {
             };
         }).filter(Boolean) as Market[];
 
-        // FALLBACK STRATEGY: If no markets found for specific query, return TRENDING markets
-        if (markets.length === 0) {
-            console.log("No markets found for query, fetching trending markets...");
-            if (typeof window === 'undefined') {
-                const trendingUrl = `https://gamma-api.polymarket.com/events?limit=10&active=true&closed=false&sort=volume&order=desc`;
-                try {
-                    const trendingRes = await fetch(trendingUrl, {
-                        headers: { 'User-Agent': 'Mozilla/5.0 (compatible; ProphetAI/1.0)' }
-                    });
-                    if (trendingRes.ok) {
-                        const trendingData = await trendingRes.json();
-                        if (Array.isArray(trendingData)) {
-                            markets = trendingData.map((event: any) => {
-                                const market = event.markets?.[0];
-                                if (!market) return null;
-                                return {
-                                    id: market.id,
-                                    question: market.question,
-                                    outcome: "N/A",
-                                    json_odds: JSON.stringify(market.outcomePrices),
-                                    active: market.active,
-                                    closed: market.closed,
-                                    market_slug: market.slug,
-                                    end_date_iso: market.endDate,
-                                    volume: event.volume ? `$${(Number(event.volume) / 1000000).toFixed(1)}M` : 'N/A'
-                                };
-                            }).filter(Boolean) as Market[];
-                        }
-                    }
-                } catch (e) { console.error("Trending fallback failed", e); }
-            } else {
-                // For client side, we might want to just let it return empty and handle in UI, 
-                // but for now let's try the generic "crypto" search which usually works
-                // actually, let's just return what we have (empty) so the UI can decide, 
-                // OR return MOCK_MARKETS if we really want to show something.
-                // Given the constraint "fetch real markets", let's return MOCK_MARKETS only on total catastrophic failure.
-            }
-        }
-
         return markets.length > 0 ? markets : MOCK_MARKETS;
 
     } catch (error) {
