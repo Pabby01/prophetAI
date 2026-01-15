@@ -43,7 +43,13 @@ export function ConnectWallet() {
 
     return (
         <button
-            onClick={() => connect({ connector: injected() })}
+            onClick={() => {
+                if (typeof window !== 'undefined' && !(window as any).ethereum) {
+                    window.open('https://metamask.io/download/', '_blank')
+                    return
+                }
+                connect({ connector: injected() })
+            }}
             disabled={isPending}
             className="bg-zinc-100 hover:bg-white text-zinc-950 px-6 py-2 rounded-full font-bold text-sm transition-all shadow-lg shadow-zinc-900/20 flex items-center gap-2 hover:scale-105 active:scale-95"
         >
