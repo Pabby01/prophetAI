@@ -178,14 +178,40 @@ export function ChatInterface({ initialPrompt }: { initialPrompt?: string }) {
                                                     className="mt-4 space-y-2"
                                                 >
                                                     <p className="text-xs text-zinc-500 font-bold uppercase tracking-wider">Vision Detected</p>
-                                                    {markets.map((market: any, idx: number) => (
-                                                        <div key={market.id || idx} className="bg-zinc-950/50 border border-zinc-800 p-3 rounded-lg flex justify-between items-center group hover:border-zinc-700 transition-colors cursor-default">
-                                                            <span className="text-xs text-zinc-300 font-medium">{market.question || "Unknown Market"}</span>
-                                                            <span className="text-xs text-blue-400 font-mono bg-blue-500/10 px-2 py-0.5 rounded">
-                                                                Odds Loading...
-                                                            </span>
-                                                        </div>
-                                                    ))}
+                                                    {markets.map((market: any, idx: number) => {
+                                                        let oddsDisplay = "Odds Pending";
+                                                        // Default to "Pending" or "Unavailable" if we can't find data. 
+                                                        // "Loading" implies async action, which isn't happening here.
+
+                                                        let prob = 0;
+
+                                                        if (!market.json_odds) {
+                                                            oddsDisplay = "Odds N/A";
+                                                        } else {
+                                                            try {
+                                                                const parsed = JSON.parse(market.json_odds);
+                                                                if (Array.isArray(parsed) && parsed.length > 0) {
+                                                                    // Show the first outcome's price (usually the main Yes/No probability)
+                                                                    prob = Math.round(Number(parsed[0]) * 100);
+                                                                    oddsDisplay = `${prob}% Chance`;
+                                                                } else {
+                                                                    oddsDisplay = "Odds N/A";
+                                                                }
+                                                            } catch (e) {
+                                                                console.warn("Error parsing odds", e);
+                                                                oddsDisplay = "Error";
+                                                            }
+                                                        }
+
+                                                        return (
+                                                            <div key={market.id || idx} className="bg-zinc-950/50 border border-zinc-800 p-3 rounded-lg flex justify-between items-center group hover:border-zinc-700 transition-colors cursor-default">
+                                                                <span className="text-xs text-zinc-300 font-medium truncate max-w-[70%]">{market.question || "Unknown Market"}</span>
+                                                                <span className={`text-xs font-mono px-2 py-0.5 rounded ${prob > 0 ? (prob > 50 ? 'bg-green-500/10 text-green-400' : 'bg-blue-500/10 text-blue-400') : 'bg-zinc-800 text-zinc-500'}`}>
+                                                                    {oddsDisplay}
+                                                                </span>
+                                                            </div>
+                                                        )
+                                                    })}
                                                 </motion.div>
                                             )
                                         }
