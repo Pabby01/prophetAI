@@ -17,5 +17,10 @@ module.exports = {
             chainId: 5003,
             accounts: process.env.PRIVATE_KEY ? [process.env.PRIVATE_KEY] : [],
         },
+        mantle: {
+            url: "https://rpc.mantle.xyz",
+            chainId: 5000,
+            accounts: process.env.PRIVATE_KEY ? [process.env.PRIVATE_KEY] : [],
+        },
     },
 };

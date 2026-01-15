@@ -9,8 +9,16 @@ import { Providers } from '@/components/Providers'
 const inter = Inter({ subsets: ['latin'] })
 
 export const metadata: Metadata = {
-  title: 'Prophet.AI - Mantle Oracle',
-  description: 'AI Prediction Market for Mantle Network',
+  title: 'Prophet AI | Mantle Prediction Market',
+  description: 'The first AI-powered prediction market built on Mantle Network. Trade on future events with proprietary AI insights.',
+  icons: {
+    icon: '/logo.png',
+  },
+  openGraph: {
+    title: 'Prophet AI - Predict the Future',
+    description: 'Trade on AI-powered prediction markets on Mantle Network.',
+    images: ['/logo.png'],
+  },
 }
 
 export default function RootLayout({

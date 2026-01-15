@@ -5,7 +5,7 @@ import { useWriteContract, useWaitForTransactionReceipt } from 'wagmi'
 import { parseEther } from 'viem'
 import { Loader2, CheckCircle2, AlertCircle } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Button } from './ui/button' // If we had shadcn, but we'll use raw for now to save time
+
 
 const ABI = [
     {

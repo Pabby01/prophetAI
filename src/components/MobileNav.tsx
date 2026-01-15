@@ -13,10 +13,8 @@ export function MobileHeader() {
         <>
             <div className="md:hidden flex items-center justify-between p-4 bg-black border-b border-zinc-900 sticky top-0 z-50">
                 <div className="flex items-center gap-2">
-                    <div className="w-8 h-8 rounded-lg bg-blue-600/20 border border-blue-500/30 flex items-center justify-center text-sm">
-                        ⚡
-                    </div>
-                    <span className="font-bold text-zinc-100">Prophet.AI</span>
+                    <img src="/logo.png" alt="Prophet AI" className="w-8 h-8 rounded-lg" />
+                    <span className="font-bold text-zinc-100">Prophet AI</span>
                 </div>
 
                 <button

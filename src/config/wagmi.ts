@@ -16,12 +16,15 @@ export const mantleSepolia = {
     testnet: true,
 } as const satisfies Chain
 
+import { mantle } from 'viem/chains'
+
 export const config = createConfig({
-    chains: [mantleSepolia],
+    chains: [mantle, mantleSepolia],
     connectors: [
         injected(),
     ],
     transports: {
+        [mantle.id]: http(),
         [mantleSepolia.id]: http(),
     },
 })

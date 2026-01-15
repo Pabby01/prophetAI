@@ -48,12 +48,12 @@ export function AppSidebar() {
         <div className="flex flex-col h-full bg-black border-r border-zinc-900 w-64 shrink-0 transition-all duration-300">
             {/* Brand */}
             <div className="p-6">
-                <h1 className="text-xl font-bold bg-gradient-to-r from-blue-400 to-purple-500 bg-clip-text text-transparent flex items-center gap-2">
-                    <div className="w-8 h-8 rounded-lg bg-blue-600/20 border border-blue-500/30 flex items-center justify-center">
-                        ⚡
-                    </div>
-                    Prophet.AI
-                </h1>
+                <div className="flex items-center gap-3">
+                    <img src="/logo.png" alt="Prophet AI" className="w-8 h-8 rounded-lg shadow-blue-500/20 shadow-lg" />
+                    <h1 className="text-xl font-bold bg-gradient-to-r from-blue-400 to-purple-500 bg-clip-text text-transparent">
+                        Prophet AI
+                    </h1>
+                </div>
             </div>
 
             {/* New Chat Button */}
