@@ -204,11 +204,20 @@ export function ChatInterface({ initialPrompt }: { initialPrompt?: string }) {
                                                         }
 
                                                         return (
-                                                            <div key={market.id || idx} className="bg-zinc-950/50 border border-zinc-800 p-3 rounded-lg flex justify-between items-center group hover:border-zinc-700 transition-colors cursor-default">
-                                                                <span className="text-xs text-zinc-300 font-medium truncate max-w-[70%]">{market.question || "Unknown Market"}</span>
-                                                                <span className={`text-xs font-mono px-2 py-0.5 rounded ${prob > 0 ? (prob > 50 ? 'bg-green-500/10 text-green-400' : 'bg-blue-500/10 text-blue-400') : 'bg-zinc-800 text-zinc-500'}`}>
-                                                                    {oddsDisplay}
-                                                                </span>
+                                                            <div key={market.id || idx} className="bg-zinc-950/50 border border-zinc-800 p-3 rounded-lg flex flex-col gap-3 group hover:border-zinc-700 transition-colors">
+                                                                <div className="flex justify-between items-start">
+                                                                    <span className="text-xs text-zinc-300 font-medium truncate max-w-[70%]">{market.question || "Unknown Market"}</span>
+                                                                    <span className={`text-xs font-mono px-2 py-0.5 rounded ${prob > 0 ? (prob > 50 ? 'bg-green-500/10 text-green-400' : 'bg-blue-500/10 text-blue-400') : 'bg-zinc-800 text-zinc-500'}`}>
+                                                                        {oddsDisplay}
+                                                                    </span>
+                                                                </div>
+
+                                                                <button
+                                                                    onClick={() => append({ role: 'user', content: `I want to bet on "${market.question}". Is the odds ${prob}%?` })}
+                                                                    className="w-full py-1.5 bg-blue-600/20 hover:bg-blue-600/30 text-blue-400 text-[10px] font-bold uppercase tracking-wider rounded border border-blue-600/20 hover:border-blue-500/50 transition-all flex items-center justify-center gap-2"
+                                                                >
+                                                                    Trade This Market
+                                                                </button>
                                                             </div>
                                                         )
                                                     })}

@@ -35,9 +35,9 @@ export async function POST(req: Request) {
         Formatting: Markdown.`,
             tools: {
                 get_odds: tool({
-                    description: 'Get odds for a market/event from Polymarket',
+                    description: 'Get dynamic odds for a market/event. Use keywords only.',
                     parameters: z.object({
-                        query: z.string().describe('The event query e.g. "Bitcoin price", "US Election"'),
+                        query: z.string().describe('Keywords to search for. Example: "Bitcoin", "Trump", "Ethereum". Do NOT use full sentences like "Will bitcoin go up?". Just "Bitcoin".'),
                     }),
                     execute: async ({ query }: { query: string }) => {
                         console.log("Tool Call: get_odds", query);

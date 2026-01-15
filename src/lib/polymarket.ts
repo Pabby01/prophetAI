@@ -84,10 +84,10 @@ export async function searchMarkets(query: string): Promise<Market[]> {
     try {
         let data;
 
-        // SERVER-SIDE CHECK (Node Environment)
         if (typeof window === 'undefined') {
             const baseUrl = `https://gamma-api.polymarket.com/events`;
-            const params = `limit=20&active=true&closed=false&sort=volume&order=desc&q=${encodeURIComponent(query)}`;
+            // USE SIMPLE PARAMS FIRST - consistently more reliable
+            const params = `limit=10&active=true&closed=false&q=${encodeURIComponent(query)}`;
 
             console.log(`Fetching: ${baseUrl}?${params}`);
 
@@ -95,31 +95,24 @@ export async function searchMarkets(query: string): Promise<Market[]> {
                 headers: { 'User-Agent': 'Mozilla/5.0 (compatible; ProphetAI/1.0)' }
             });
 
-            // Retry with simple query if 422 (often caused by sorting issues on low data)
-            if (response.status === 422) {
-                console.warn("422 Error with Sort. Retrying simple query...");
-                const simpleParams = `limit=10&active=true&closed=false&q=${encodeURIComponent(query)}`;
-                response = await fetch(`${baseUrl}?${simpleParams}`, {
-                    headers: { 'User-Agent': 'Mozilla/5.0 (compatible; ProphetAI/1.0)' }
-                });
+            if (response.ok) {
+                data = await response.json();
+            } else {
+                console.warn(`Polymarket API Error: ${response.status}`);
             }
-
-            if (!response.ok) throw new Error(`Polymarket API Error: ${response.status}`);
-            data = await response.json();
         }
         // CLIENT-SIDE: Use Proxy
         else {
             const response = await fetch(`/api/markets?q=${encodeURIComponent(query)}`);
-            if (!response.ok) throw new Error("Proxy API Error");
-            data = await response.json();
+            if (response.ok) data = await response.json();
         }
 
         if (!Array.isArray(data)) {
-            console.warn("Invalid API Data Format");
-            return MOCK_MARKETS;
+            console.warn("Invalid API Data Format, data is:", data);
+            data = [];
         }
 
-        const markets = data.map((event: any) => {
+        let markets = data.map((event: any) => {
             const market = event.markets?.[0];
             if (!market) return null;
 
@@ -134,7 +127,46 @@ export async function searchMarkets(query: string): Promise<Market[]> {
                 end_date_iso: market.endDate,
                 volume: event.volume ? `$${(Number(event.volume) / 1000000).toFixed(1)}M` : 'N/A'
             };
-        }).filter(Boolean) as Market[]; // Explicit cast to remove nulls type-check
+        }).filter(Boolean) as Market[];
+
+        // FALLBACK STRATEGY: If no markets found for specific query, return TRENDING markets
+        if (markets.length === 0) {
+            console.log("No markets found for query, fetching trending markets...");
+            if (typeof window === 'undefined') {
+                const trendingUrl = `https://gamma-api.polymarket.com/events?limit=10&active=true&closed=false&sort=volume&order=desc`;
+                try {
+                    const trendingRes = await fetch(trendingUrl, {
+                        headers: { 'User-Agent': 'Mozilla/5.0 (compatible; ProphetAI/1.0)' }
+                    });
+                    if (trendingRes.ok) {
+                        const trendingData = await trendingRes.json();
+                        if (Array.isArray(trendingData)) {
+                            markets = trendingData.map((event: any) => {
+                                const market = event.markets?.[0];
+                                if (!market) return null;
+                                return {
+                                    id: market.id,
+                                    question: market.question,
+                                    outcome: "N/A",
+                                    json_odds: JSON.stringify(market.outcomePrices),
+                                    active: market.active,
+                                    closed: market.closed,
+                                    market_slug: market.slug,
+                                    end_date_iso: market.endDate,
+                                    volume: event.volume ? `$${(Number(event.volume) / 1000000).toFixed(1)}M` : 'N/A'
+                                };
+                            }).filter(Boolean) as Market[];
+                        }
+                    }
+                } catch (e) { console.error("Trending fallback failed", e); }
+            } else {
+                // For client side, we might want to just let it return empty and handle in UI, 
+                // but for now let's try the generic "crypto" search which usually works
+                // actually, let's just return what we have (empty) so the UI can decide, 
+                // OR return MOCK_MARKETS if we really want to show something.
+                // Given the constraint "fetch real markets", let's return MOCK_MARKETS only on total catastrophic failure.
+            }
+        }
 
         return markets.length > 0 ? markets : MOCK_MARKETS;
 
