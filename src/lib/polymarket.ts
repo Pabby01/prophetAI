@@ -116,11 +116,18 @@ export async function searchMarkets(query: string): Promise<Market[]> {
             const market = event.markets?.[0];
             if (!market) return null;
 
+            let oddString = "[]";
+            if (typeof market.outcomePrices === 'string') {
+                oddString = market.outcomePrices;
+            } else if (Array.isArray(market.outcomePrices)) {
+                oddString = JSON.stringify(market.outcomePrices);
+            }
+
             return {
                 id: market.id,
                 question: market.question,
                 outcome: "N/A",
-                json_odds: JSON.stringify(market.outcomePrices),
+                json_odds: oddString,
                 active: market.active,
                 closed: market.closed,
                 market_slug: market.slug,
