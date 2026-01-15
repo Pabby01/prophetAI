@@ -67,8 +67,16 @@ export default function MarketsPage() {
             {/* Grid */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {markets.map((market, i) => {
-                    const odds = JSON.parse(market.json_odds || "[]")
-                    const yesChance = odds[0] ? Math.round(Number(odds[0]) * 100) : 50
+                    let yesChance: number | string = "N/A"
+                    try {
+                        const odds = JSON.parse(market.json_odds || "[]")
+                        if (Array.isArray(odds) && odds.length > 0) {
+                            const val = Number(odds[0])
+                            if (!isNaN(val)) {
+                                yesChance = Math.round(val * 100)
+                            }
+                        }
+                    } catch (e) { console.error("Odds Parse Error", e) }
 
                     return (
                         <motion.div
@@ -80,7 +88,9 @@ export default function MarketsPage() {
                             className="bg-zinc-900/50 border border-zinc-800 hover:border-zinc-700 p-6 rounded-xl cursor-pointer group transition-all hover:bg-zinc-900 flex flex-col h-full"
                         >
                             <div className="flex justify-between items-start mb-4">
-                                <div className={`text-2xl font-bold ${yesChance > 50 ? 'text-green-500' : 'text-blue-500'}`}>{yesChance}%</div>
+                                <div className={`text-2xl font-bold ${typeof yesChance === 'number' ? (yesChance > 50 ? 'text-green-500' : 'text-blue-500') : 'text-zinc-500'}`}>
+                                    {yesChance}{typeof yesChance === 'number' ? '%' : ''}
+                                </div>
                                 {market.volume && (
                                     <div className="text-xs text-zinc-500 bg-zinc-950 px-2 py-1 rounded border border-zinc-800">
                                         {market.volume}
