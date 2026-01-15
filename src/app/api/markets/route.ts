@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { MOCK_MARKETS } from '@/lib/polymarket';
+
 
 export async function GET(request: Request) {
     const { searchParams } = new URL(request.url);
@@ -23,14 +23,14 @@ export async function GET(request: Request) {
         }
 
         if (!response.ok) {
-            console.warn(`Polymarket API responded with ${response.status}, serving mock data.`);
-            return NextResponse.json(MOCK_MARKETS);
+            console.warn(`Polymarket API responded with ${response.status}, serving empty.`);
+            return NextResponse.json([]);
         }
 
         const data = await response.json();
         return NextResponse.json(data);
     } catch (error) {
-        console.error('Polymarket Proxy Error, serving mock data:', error);
-        return NextResponse.json(MOCK_MARKETS);
+        console.error('Polymarket Proxy Error, serving failure:', error);
+        return NextResponse.json([]); // Fail gracefully with empty array, NO MOCKS
     }
 }
